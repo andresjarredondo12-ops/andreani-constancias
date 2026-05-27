@@ -1,41 +1,151 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Documento Complejo</title>
 
   <style>
+    *{
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body{
-      font-family:Arial;
-      padding:40px;
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      padding: 40px;
+      color: #333;
+    }
+
+    .container{
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
 
     h1{
-      color:red;
+      color: red;
+      margin-bottom: 25px;
+      text-align: center;
     }
 
     table{
-      width:100%;
-      border-collapse:collapse;
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th{
+      background-color: #222;
+      color: white;
+      padding: 12px;
+      border: 1px solid #000;
+      text-align: left;
     }
 
     td{
-      border:1px solid black;
-      padding:10px;
+      border: 1px solid #000;
+      padding: 12px;
+      background-color: #fafafa;
+    }
+
+    tr:nth-child(even) td{
+      background-color: #f0f0f0;
+    }
+
+    tr:hover td{
+      background-color: #dfefff;
+      transition: 0.3s;
+    }
+
+    .footer{
+      margin-top: 30px;
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+    }
+
+    @media (max-width: 600px){
+      body{
+        padding: 15px;
+      }
+
+      .container{
+        padding: 20px;
+      }
+
+      table,
+      thead,
+      tbody,
+      th,
+      td,
+      tr{
+        display: block;
+        width: 100%;
+      }
+
+      th{
+        display: none;
+      }
+
+      tr{
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      td{
+        border: none;
+        border-bottom: 1px solid #ddd;
+      }
     }
   </style>
-
 </head>
 
 <body>
 
-<h1>Documento Complejo</h1>
+  <div class="container">
 
-<table>
-  <tr>
-    <td>Dato 1</td>
-    <td>Dato 2</td>
-  </tr>
-</table>
+    <h1>Documento Complejo</h1>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Columna 1</th>
+          <th>Columna 2</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td>Dato 1</td>
+          <td>Dato 2</td>
+        </tr>
+
+        <tr>
+          <td>Dato 3</td>
+          <td>Dato 4</td>
+        </tr>
+
+        <tr>
+          <td>Dato 5</td>
+          <td>Dato 6</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      Documento generado correctamente en HTML5
+    </div>
+
+  </div>
 
 </body>
 </html>
