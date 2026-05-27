@@ -1,318 +1,335 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>Conversor Masivo HTML → PDF</title>
+<title>Conversor Masivo HTML → PDF</title>
 
-  <style>
-    *{
-      margin:0;
-      padding:0;
-      box-sizing:border-box;
-    }
+<style>
 
-    body{
-      font-family:Arial, Helvetica, sans-serif;
-      background:#f4f4f4;
-      padding:30px;
-      color:#333;
-    }
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
 
-    .container{
-      max-width:1200px;
-      margin:auto;
-      background:white;
-      padding:30px;
-      border-radius:12px;
-      box-shadow:0 0 20px rgba(0,0,0,0.1);
-    }
+body{
+  font-family:Arial, sans-serif;
+  background:#f4f4f4;
+  padding:30px;
+}
 
-    h1{
-      text-align:center;
-      margin-bottom:20px;
-      color:#d62828;
-    }
+.container{
+  max-width:1200px;
+  margin:auto;
+  background:white;
+  padding:30px;
+  border-radius:12px;
+  box-shadow:0 0 15px rgba(0,0,0,0.1);
+}
 
-    p{
-      text-align:center;
-      margin-bottom:25px;
-      line-height:1.6;
-    }
+h1{
+  text-align:center;
+  margin-bottom:20px;
+  color:#c1121f;
+}
 
-    .controls{
-      display:flex;
-      flex-wrap:wrap;
-      gap:15px;
-      justify-content:center;
-      margin-bottom:25px;
-    }
+p{
+  text-align:center;
+  margin-bottom:25px;
+}
 
-    input[type="file"]{
-      padding:10px;
-      border:1px solid #ccc;
-      border-radius:8px;
-      background:white;
-    }
+.controls{
+  display:flex;
+  gap:15px;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin-bottom:20px;
+}
 
-    button{
-      padding:12px 20px;
-      border:none;
-      border-radius:8px;
-      background:#0077ff;
-      color:white;
-      cursor:pointer;
-      font-size:16px;
-      transition:0.3s;
-    }
+input[type=file]{
+  padding:10px;
+  border:1px solid #ccc;
+  border-radius:8px;
+}
 
-    button:hover{
-      background:#005fd1;
-    }
+button{
+  padding:12px 20px;
+  border:none;
+  border-radius:8px;
+  background:#0077ff;
+  color:white;
+  cursor:pointer;
+  font-size:16px;
+}
 
-    button:disabled{
-      background:#999;
-      cursor:not-allowed;
-    }
+button:hover{
+  background:#005dd1;
+}
 
-    .file-list{
-      margin-top:25px;
-      border:1px solid #ccc;
-      border-radius:10px;
-      overflow:hidden;
-    }
+button:disabled{
+  background:#888;
+  cursor:not-allowed;
+}
 
-    .file-item{
-      padding:12px 15px;
-      border-bottom:1px solid #ddd;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      background:#fafafa;
-    }
+#fileList{
+  margin-top:25px;
+  border:1px solid #ccc;
+  border-radius:10px;
+  overflow:hidden;
+}
 
-    .file-item:nth-child(even){
-      background:#f0f0f0;
-    }
+.file-item{
+  padding:12px;
+  border-bottom:1px solid #ddd;
+  display:flex;
+  justify-content:space-between;
+  background:#fafafa;
+}
 
-    .status-ok{
-      color:green;
-      font-weight:bold;
-    }
+.file-item:nth-child(even){
+  background:#f0f0f0;
+}
 
-    .status-wait{
-      color:#cc8800;
-      font-weight:bold;
-    }
+.ok{
+  color:green;
+  font-weight:bold;
+}
 
-    iframe{
-      width:0;
-      height:0;
-      border:none;
-      visibility:hidden;
-      position:absolute;
-    }
+.error{
+  color:red;
+  font-weight:bold;
+}
 
-    .info{
-      margin-top:20px;
-      background:#eef6ff;
-      border-left:5px solid #0077ff;
-      padding:15px;
-      border-radius:8px;
-      line-height:1.6;
-    }
+.pending{
+  color:orange;
+  font-weight:bold;
+}
 
-    @media(max-width:768px){
+iframe{
+  width:0;
+  height:0;
+  border:none;
+  position:absolute;
+  visibility:hidden;
+}
 
-      body{
-        padding:15px;
-      }
+.info{
+  margin-top:20px;
+  padding:15px;
+  background:#eef6ff;
+  border-left:5px solid #0077ff;
+  border-radius:8px;
+}
 
-      .container{
-        padding:20px;
-      }
-
-      .controls{
-        flex-direction:column;
-      }
-
-      button,
-      input[type="file"]{
-        width:100%;
-      }
-    }
-  </style>
+</style>
 </head>
 
 <body>
 
-  <div class="container">
+<div class="container">
 
-    <h1>Conversor Masivo HTML → PDF</h1>
+<h1>Conversor Masivo HTML → PDF</h1>
 
-    <p>
-      Selecciona múltiples archivos HTML o una carpeta completa.
-      El sistema abrirá cada archivo y permitirá imprimirlo en PDF.
-    </p>
+<p>
+Subí múltiples archivos HTML o una carpeta completa.
+</p>
 
-    <div class="controls">
+<div class="controls">
 
-      <input
-        type="file"
-        id="fileInput"
-        accept=".html,.htm"
-        multiple
-      >
+<input
+  type="file"
+  id="folderInput"
+  webkitdirectory
+  multiple
+>
 
-      <input
-        type="file"
-        id="folderInput"
-        webkitdirectory
-        directory
-        multiple
-      >
+<button id="loadBtn">
+  Cargar HTMLs
+</button>
 
-      <button id="loadBtn">
-        Cargar Archivos
-      </button>
+<button id="convertBtn" disabled>
+  Convertir a PDF
+</button>
 
-      <button id="convertBtn" disabled>
-        Convertir Todos a PDF
-      </button>
+</div>
 
-    </div>
+<div class="info">
+El navegador abrirá automáticamente el diálogo de impresión
+para cada HTML.
+</div>
 
-    <div class="info">
-      <strong>Importante:</strong><br>
-      Los navegadores NO permiten generar PDFs automáticamente
-      sin interacción del usuario por razones de seguridad.<br><br>
+<div id="fileList"></div>
 
-      Este sistema:
-      <ul style="margin-top:10px; padding-left:20px;">
-        <li>Carga múltiples archivos HTML.</li>
-        <li>Los procesa uno por uno.</li>
-        <li>Abre el diálogo real de impresión del navegador.</li>
-        <li>Permite guardar cada uno como PDF.</li>
-      </ul>
-    </div>
+</div>
 
-    <div class="file-list" id="fileList"></div>
+<iframe id="viewer"></iframe>
 
-  </div>
+<script>
 
-  <iframe id="viewer"></iframe>
+const folderInput = document.getElementById("folderInput");
+const loadBtn = document.getElementById("loadBtn");
+const convertBtn = document.getElementById("convertBtn");
+const fileList = document.getElementById("fileList");
+const viewer = document.getElementById("viewer");
 
-  <script>
-    const fileInput = document.getElementById("fileInput");
-    const folderInput = document.getElementById("folderInput");
-    const loadBtn = document.getElementById("loadBtn");
-    const convertBtn = document.getElementById("convertBtn");
-    const fileList = document.getElementById("fileList");
-    const viewer = document.getElementById("viewer");
+let htmlFiles = [];
 
-    let htmlFiles = [];
+loadBtn.addEventListener("click", () => {
 
-    loadBtn.addEventListener("click", () => {
+  htmlFiles = [];
 
-      htmlFiles = [];
+  const files = Array.from(folderInput.files);
 
-      const files1 = Array.from(fileInput.files);
-      const files2 = Array.from(folderInput.files);
+  if(files.length === 0){
+    alert("Seleccioná una carpeta.");
+    return;
+  }
 
-      const allFiles = [...files1, ...files2];
+  // SOLO HTML REALES
+  htmlFiles = files.filter(file => {
 
-      const filtered = allFiles.filter(file =>
-        file.name.endsWith(".html") ||
-        file.name.endsWith(".htm")
-      );
+    const name = file.name.toLowerCase();
 
-      if(filtered.length === 0){
-        alert("No se encontraron archivos HTML.");
-        return;
-      }
+    return (
+      name.endsWith(".html") ||
+      name.endsWith(".htm")
+    );
 
-      htmlFiles = filtered;
+  });
 
-      renderList();
+  if(htmlFiles.length === 0){
+    alert("No se encontraron archivos HTML.");
+    return;
+  }
 
-      convertBtn.disabled = false;
-    });
+  renderList();
 
-    function renderList(){
+  convertBtn.disabled = false;
 
-      fileList.innerHTML = "";
+});
 
-      htmlFiles.forEach((file, index) => {
+function renderList(){
 
-        const div = document.createElement("div");
+  fileList.innerHTML = "";
 
-        div.className = "file-item";
+  htmlFiles.forEach((file, index) => {
 
-        div.innerHTML = `
-          <span>${index + 1}. ${file.name}</span>
-          <span class="status-wait" id="status-${index}">
-            Pendiente
-          </span>
-        `;
+    const div = document.createElement("div");
 
-        fileList.appendChild(div);
-      });
-    }
+    div.className = "file-item";
 
-    convertBtn.addEventListener("click", async () => {
+    div.innerHTML = `
+      <span>${file.webkitRelativePath || file.name}</span>
+      <span class="pending" id="status-${index}">
+        Pendiente
+      </span>
+    `;
 
-      for(let i = 0; i < htmlFiles.length; i++){
+    fileList.appendChild(div);
 
-        await processFile(htmlFiles[i], i);
-      }
+  });
 
-      alert("Proceso finalizado.");
-    });
+}
 
-    function processFile(file, index){
+convertBtn.addEventListener("click", async () => {
 
-      return new Promise((resolve) => {
+  for(let i = 0; i < htmlFiles.length; i++){
 
-        const reader = new FileReader();
+    await processHTML(htmlFiles[i], i);
 
-        reader.onload = function(e){
+  }
 
-          const htmlContent = e.target.result;
+  alert("Conversión finalizada.");
+
+});
+
+function processHTML(file, index){
+
+  return new Promise((resolve) => {
+
+    try{
+
+      const reader = new FileReader();
+
+      reader.onload = function(event){
+
+        try{
+
+          const html = event.target.result;
 
           const iframeDoc =
             viewer.contentDocument ||
             viewer.contentWindow.document;
 
           iframeDoc.open();
-          iframeDoc.write(htmlContent);
+          iframeDoc.write(html);
           iframeDoc.close();
 
-          setTimeout(() => {
+          document.getElementById(
+            `status-${index}`
+          ).innerHTML =
+            `<span class="ok">Procesado</span>`;
 
-            document.getElementById(
-              `status-${index}`
-            ).innerHTML =
-              `<span class="status-ok">Procesando...</span>`;
+          setTimeout(() => {
 
             viewer.contentWindow.focus();
 
             viewer.contentWindow.print();
 
-            document.getElementById(
-              `status-${index}`
-            ).innerHTML =
-              `<span class="status-ok">Completado</span>`;
-
             resolve();
 
-          }, 700);
-        };
+          }, 800);
 
-        reader.readAsText(file);
-      });
+        }
+        catch(err){
+
+          document.getElementById(
+            `status-${index}`
+          ).innerHTML =
+            `<span class="error">Error HTML</span>`;
+
+          console.error(err);
+
+          resolve();
+
+        }
+
+      };
+
+      reader.onerror = function(){
+
+        document.getElementById(
+          `status-${index}`
+        ).innerHTML =
+          `<span class="error">Error lectura</span>`;
+
+        resolve();
+
+      };
+
+      reader.readAsText(file);
+
     }
-  </script>
+    catch(err){
+
+      document.getElementById(
+        `status-${index}`
+      ).innerHTML =
+        `<span class="error">Error general</span>`;
+
+      console.error(err);
+
+      resolve();
+
+    }
+
+  });
+
+}
+
+</script>
 
 </body>
 </html>
