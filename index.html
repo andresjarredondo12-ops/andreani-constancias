@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>HTML a PDF Exacto</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="container">
+
+    <h1>Convertidor HTML → PDF</h1>
+
+    <p>
+      Este sistema abre un archivo HTML y lo imprime usando
+      el motor real del navegador.
+    </p>
+
+    <input type="file" id="fileInput" accept=".html,.htm">
+
+    <button id="loadBtn">
+      Abrir HTML
+    </button>
+
+    <button id="printBtn" disabled>
+      Guardar como PDF
+    </button>
+
+    <div class="viewer-container">
+      <iframe id="viewer"></iframe>
+    </div>
+
+  </div>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
