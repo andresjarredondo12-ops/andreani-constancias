@@ -6,11 +6,11 @@
 
 <title>Conversor Automático HTML → PDF</title>
 
-<!-- jsPDF -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
 <!-- html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 
@@ -49,8 +49,8 @@ p{
 
 .controls{
   display:flex;
-  flex-wrap:wrap;
   gap:15px;
+  flex-wrap:wrap;
   justify-content:center;
   margin-bottom:25px;
 }
@@ -120,6 +120,7 @@ button:disabled{
   top:0;
   width:1200px;
   background:white;
+  padding:0;
 }
 
 .info{
@@ -128,7 +129,7 @@ button:disabled{
   border-left:5px solid #0077ff;
   padding:15px;
   border-radius:8px;
-  line-height:1.6;
+  line-height:1.7;
 }
 
 </style>
@@ -141,8 +142,8 @@ button:disabled{
 <h1>Conversor Automático HTML → PDF</h1>
 
 <p>
-Subí una carpeta completa con archivos HTML.<br>
-La conversión a PDF será automática.
+Convierte automáticamente múltiples archivos HTML a PDF.<br>
+Los PDFs se guardarán automáticamente usando el ID y seguimiento encontrados dentro del HTML.
 </p>
 
 <div class="controls">
@@ -155,7 +156,7 @@ La conversión a PDF será automática.
 >
 
 <button id="loadBtn">
-  Cargar HTMLs
+  Cargar Carpeta
 </button>
 
 <button id="convertBtn" disabled>
@@ -165,10 +166,13 @@ La conversión a PDF será automática.
 </div>
 
 <div class="info">
+
 ✅ Conversión masiva automática<br>
-✅ Sin aceptar manualmente uno por uno<br>
-✅ Generación PDF real<br>
-✅ Compatible con Chrome y Edge
+✅ Nombre PDF automático<br>
+✅ Extracción de ID y Seguimiento<br>
+✅ Sin abrir impresión del navegador<br>
+✅ Compatible con Chrome / Edge
+
 </div>
 
 <div id="fileList"></div>
@@ -214,13 +218,13 @@ loadBtn.addEventListener("click", () => {
     return;
   }
 
-  renderFiles();
+  renderFileList();
 
   convertBtn.disabled = false;
 
 });
 
-function renderFiles(){
+function renderFileList(){
 
   fileList.innerHTML = "";
 
@@ -249,17 +253,17 @@ convertBtn.addEventListener("click", async () => {
 
   for(let i = 0; i < htmlFiles.length; i++){
 
-    await convertHTMLToPDF(htmlFiles[i], i);
+    await processHTML(htmlFiles[i], i);
 
   }
 
-  alert("Conversión masiva finalizada.");
+  alert("Conversión finalizada.");
 
   convertBtn.disabled = false;
 
 });
 
-async function convertHTMLToPDF(file, index){
+async function processHTML(file, index){
 
   return new Promise((resolve) => {
 
@@ -271,23 +275,35 @@ async function convertHTMLToPDF(file, index){
 
         const html = event.target.result;
 
+        // Renderizar HTML
         renderArea.innerHTML = html;
 
+        // Esperar imágenes
         await waitImages();
 
+        // Extraer ID y Seguimiento
+        const extractedName = extractTracking(html);
+
+        // Captura HTML
         const canvas = await html2canvas(renderArea, {
           scale:2,
           useCORS:true,
-          allowTaint:true
+          allowTaint:true,
+          logging:false
         });
 
         const imgData = canvas.toDataURL("image/png");
 
         const { jsPDF } = window.jspdf;
 
-        const pdf = new jsPDF("p", "mm", "a4");
+        const pdf = new jsPDF({
+          orientation:"p",
+          unit:"mm",
+          format:"a4"
+        });
 
         const pdfWidth = 210;
+
         const pdfHeight =
           (canvas.height * pdfWidth) / canvas.width;
 
@@ -300,10 +316,12 @@ async function convertHTMLToPDF(file, index){
           pdfHeight
         );
 
-        const fileName =
-          file.name.replace(/\.html?$/i, "") + ".pdf";
+        // Nombre automático
+        const finalName =
+          extractedName + ".pdf";
 
-        pdf.save(fileName);
+        // DESCARGA AUTOMÁTICA
+        pdf.save(finalName);
 
         document.getElementById(
           `status-${index}`
@@ -342,6 +360,62 @@ async function convertHTMLToPDF(file, index){
     reader.readAsText(file);
 
   });
+
+}
+
+function extractTracking(html){
+
+  try{
+
+    // Buscar número largo tipo seguimiento
+    const trackingMatch = html.match(/\b\d{12,25}\b/g);
+
+    let tracking = "";
+
+    if(trackingMatch && trackingMatch.length > 0){
+
+      tracking = trackingMatch[0];
+
+    }
+
+    // Buscar ID
+    const idMatch = html.match(/ID[:\s]*([0-9]+)/i);
+
+    let id = "";
+
+    if(idMatch){
+
+      id = idMatch[1];
+
+    }
+
+    // Generar nombre
+    if(tracking && id){
+
+      return `${tracking}_ID_${id}`;
+
+    }
+
+    if(tracking){
+
+      return tracking;
+
+    }
+
+    if(id){
+
+      return `ID_${id}`;
+
+    }
+
+    return "documento_" + Date.now();
+
+  }
+  catch(error){
+
+    return "documento_" + Date.now();
+
+  }
 
 }
 
