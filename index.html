@@ -6,128 +6,60 @@
 
 <title>Conversor Masivo HTML → PDF</title>
 
-<!-- html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-}
-
 body{
-  font-family:Arial, sans-serif;
+  font-family: Arial;
   background:#f4f4f4;
   padding:30px;
 }
 
 .container{
-  max-width:1200px;
+  max-width:1100px;
   margin:auto;
   background:white;
-  padding:30px;
+  padding:25px;
   border-radius:12px;
-  box-shadow:0 0 15px rgba(0,0,0,0.1);
 }
 
 h1{
   text-align:center;
   color:#c1121f;
-  margin-bottom:20px;
-}
-
-p{
-  text-align:center;
-  margin-bottom:25px;
-  line-height:1.6;
 }
 
 .controls{
   display:flex;
-  gap:15px;
-  flex-wrap:wrap;
+  gap:10px;
   justify-content:center;
-  margin-bottom:25px;
+  margin:20px 0;
 }
 
-input[type=file]{
+input,button{
   padding:10px;
-  border:1px solid #ccc;
-  border-radius:8px;
 }
 
-button{
-  padding:12px 20px;
-  border:none;
-  border-radius:8px;
-  background:#0077ff;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
+#list{
+  margin-top:20px;
 }
 
-button:hover{
-  background:#005dd1;
-}
-
-button:disabled{
-  background:#888;
-}
-
-#fileList{
-  margin-top:25px;
-  border:1px solid #ccc;
-  border-radius:10px;
-  overflow:hidden;
-}
-
-.file-item{
-  padding:12px;
-  border-bottom:1px solid #ddd;
+.item{
   display:flex;
   justify-content:space-between;
-  background:#fafafa;
+  padding:10px;
+  border-bottom:1px solid #ddd;
 }
 
-.file-item:nth-child(even){
-  background:#f0f0f0;
-}
+.ok{ color:green; }
+.err{ color:red; }
+.wait{ color:orange; }
 
-.pending{
-  color:orange;
-  font-weight:bold;
-}
-
-.ok{
-  color:green;
-  font-weight:bold;
-}
-
-.error{
-  color:red;
-  font-weight:bold;
-}
-
-#renderArea{
+#render{
   position:absolute;
   left:-99999px;
-  top:0;
   width:1200px;
-  background:white;
-}
-
-.info{
-  margin-top:20px;
-  padding:15px;
-  background:#eef6ff;
-  border-left:5px solid #0077ff;
-  border-radius:8px;
-  line-height:1.7;
 }
 
 </style>
@@ -139,313 +71,153 @@ button:disabled{
 
 <h1>Conversor Masivo HTML → PDF</h1>
 
-<p>
-Convierte automáticamente carpetas completas de HTML a PDF.
-</p>
-
 <div class="controls">
 
-<input
-  type="file"
-  id="folderInput"
-  webkitdirectory
-  multiple
->
+<input type="file" id="folder" webkitdirectory multiple>
 
-<button id="loadBtn">
-  Cargar Carpeta
-</button>
-
-<button id="convertBtn" disabled>
-  Convertir Todo
-</button>
+<button id="start">Convertir</button>
 
 </div>
 
-<div class="info">
-
-✅ Conversión automática masiva<br>
-✅ Descarga automática<br>
-✅ Nombre PDF = seguimiento + ID<br>
-✅ Sin abrir imprimir<br>
-✅ Sin aceptar guardar uno por uno<br>
-✅ Extracción automática desde HTML
+<div id="list"></div>
 
 </div>
 
-<div id="fileList"></div>
-
-</div>
-
-<div id="renderArea"></div>
+<div id="render"></div>
 
 <script>
 
-const folderInput = document.getElementById("folderInput");
-const loadBtn = document.getElementById("loadBtn");
-const convertBtn = document.getElementById("convertBtn");
-const fileList = document.getElementById("fileList");
-const renderArea = document.getElementById("renderArea");
+const folder = document.getElementById("folder");
+const start = document.getElementById("start");
+const list = document.getElementById("list");
+const render = document.getElementById("render");
 
-let htmlFiles = [];
+let files = [];
 
-loadBtn.addEventListener("click", () => {
+start.addEventListener("click", async () => {
 
-  htmlFiles = [];
+  files = [...folder.files].filter(f =>
+    f.name.endsWith(".html") || f.name.endsWith(".htm")
+  );
 
-  const files = Array.from(folderInput.files);
+  renderList();
 
-  if(files.length === 0){
-    alert("Seleccioná una carpeta.");
-    return;
-  }
-
-  htmlFiles = files.filter(file => {
-
-    const name = file.name.toLowerCase();
-
-    return (
-      name.endsWith(".html") ||
-      name.endsWith(".htm")
-    );
-
-  });
-
-  if(htmlFiles.length === 0){
-    alert("No se encontraron archivos HTML.");
-    return;
-  }
-
-  renderFileList();
-
-  convertBtn.disabled = false;
+  await processQueue(files);
 
 });
 
-function renderFileList(){
+function renderList(){
 
-  fileList.innerHTML = "";
+  list.innerHTML = "";
 
-  htmlFiles.forEach((file, index) => {
+  files.forEach((f,i)=>{
 
-    const div = document.createElement("div");
-
-    div.className = "file-item";
-
-    div.innerHTML = `
-      <span>${file.webkitRelativePath}</span>
-      <span class="pending" id="status-${index}">
-        Pendiente
-      </span>
+    list.innerHTML += `
+      <div class="item">
+        <span>${f.name}</span>
+        <span id="s${i}" class="wait">Pendiente</span>
+      </div>
     `;
-
-    fileList.appendChild(div);
 
   });
 
 }
 
-convertBtn.addEventListener("click", async () => {
+async function processQueue(files){
 
-  convertBtn.disabled = true;
+  for(let i=0;i<files.length;i++){
 
-  for(let i = 0; i < htmlFiles.length; i++){
+    await convert(files[i], i);
 
-    await convertHTML(htmlFiles[i], i);
+    // 🔥 CLAVE: delay para evitar bloqueo Chrome
+    await new Promise(r => setTimeout(r, 1200));
 
   }
 
-  alert("Conversión finalizada.");
+  alert("Proceso terminado");
+}
 
-  convertBtn.disabled = false;
+async function convert(file,index){
 
-});
+  try{
 
-async function convertHTML(file, index){
+    const text = await file.text();
 
-  return new Promise((resolve) => {
+    render.innerHTML = text;
 
-    const reader = new FileReader();
+    await waitImages();
 
-    reader.onload = async function(event){
+    const { tracking, id } = extractData(text);
 
-      try{
+    const canvas = await html2canvas(render,{scale:2});
 
-        const html = event.target.result;
+    const img = canvas.toDataURL("image/png");
 
-        // Render HTML
-        renderArea.innerHTML = html;
+    const { jsPDF } = window.jspdf;
 
-        // Esperar imágenes
-        await waitImages();
+    const pdf = new jsPDF("p","mm","a4");
 
-        // Extraer tracking + ID
-        const data = extractData(html);
+    const w = 210;
+    const h = canvas.height * w / canvas.width;
 
-        // Canvas
-        const canvas = await html2canvas(renderArea, {
-          scale:2,
-          useCORS:true,
-          allowTaint:true,
-          backgroundColor:"#ffffff"
-        });
+    pdf.addImage(img,"PNG",0,0,w,h);
 
-        const imgData = canvas.toDataURL("image/png");
+    const name = `${tracking}_ID_${id}.pdf`;
 
-        const { jsPDF } = window.jspdf;
+    const blob = pdf.output("blob");
 
-        const pdf = new jsPDF({
-          orientation:"p",
-          unit:"mm",
-          format:"a4"
-        });
+    const url = URL.createObjectURL(blob);
 
-        const pdfWidth = 210;
+    const a = document.createElement("a");
 
-        const pdfHeight =
-          (canvas.height * pdfWidth) / canvas.width;
+    a.href = url;
+    a.download = name;
 
-        pdf.addImage(
-          imgData,
-          "PNG",
-          0,
-          0,
-          pdfWidth,
-          pdfHeight
-        );
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
 
-        // NOMBRE FINAL
-        const finalName =
-          `${data.tracking}_ID_${data.id}.pdf`;
+    URL.revokeObjectURL(url);
 
-        // BLOB
-        const blob = pdf.output("blob");
+    document.getElementById("s"+index).innerHTML =
+      "<span class='ok'>Descargado</span>";
 
-        // URL
-        const url = URL.createObjectURL(blob);
+  }catch(e){
 
-        // DESCARGA AUTOMÁTICA
-        const a = document.createElement("a");
+    document.getElementById("s"+index).innerHTML =
+      "<span class='err'>Error</span>";
 
-        a.href = url;
-
-        a.download = finalName;
-
-        document.body.appendChild(a);
-
-        a.click();
-
-        document.body.removeChild(a);
-
-        URL.revokeObjectURL(url);
-
-        document.getElementById(
-          `status-${index}`
-        ).innerHTML =
-          `<span class="ok">Descargado</span>`;
-
-        resolve();
-
-      }
-      catch(error){
-
-        console.error(error);
-
-        document.getElementById(
-          `status-${index}`
-        ).innerHTML =
-          `<span class="error">Error</span>`;
-
-        resolve();
-
-      }
-
-    };
-
-    reader.onerror = function(){
-
-      document.getElementById(
-        `status-${index}`
-      ).innerHTML =
-        `<span class="error">Error lectura</span>`;
-
-      resolve();
-
-    };
-
-    reader.readAsText(file);
-
-  });
+  }
 
 }
 
 function extractData(html){
 
-  let tracking = "SIN_TRACKING";
-  let id = "SIN_ID";
+  // ✔ TRACKING (amarillo barcode)
+  let tracking = (html.match(/\b\d{18,25}\b/) || [])[0] || "NO_TRACK";
 
-  try{
+  // ✔ ID (rojo)
+  let id = "NO_ID";
 
-    // TRACKING
-    const trackingMatches =
-      html.match(/\b\d{12,25}\b/g);
+  const idMatch = html.match(/ID\s*:\s*(\d+)/i);
 
-    if(trackingMatches){
+  if(idMatch) id = idMatch[1];
 
-      tracking = trackingMatches[0];
-
-    }
-
-    // ID
-    const idRegex =
-      /ID[:\s]*([0-9]+)/i;
-
-    const idMatch =
-      html.match(idRegex);
-
-    if(idMatch){
-
-      id = idMatch[1];
-
-    }
-
-  }
-  catch(error){
-
-    console.error(error);
-
-  }
-
-  return {
-    tracking,
-    id
-  };
+  return { tracking, id };
 
 }
 
 function waitImages(){
 
-  const images =
-    renderArea.querySelectorAll("img");
+  const imgs = render.querySelectorAll("img");
 
-  const promises = [];
-
-  images.forEach(img => {
-
-    if(img.complete){
-      return;
-    }
-
-    promises.push(new Promise(resolve => {
-
-      img.onload = resolve;
-      img.onerror = resolve;
-
-    }));
-
-  });
-
-  return Promise.all(promises);
+  return Promise.all([...imgs].map(img=>{
+    if(img.complete) return;
+    return new Promise(r=>{
+      img.onload = r;
+      img.onerror = r;
+    });
+  }));
 
 }
 
