@@ -6,8 +6,10 @@
 
 <title>Conversor Masivo HTML → PDF</title>
 
+<!-- html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -47,10 +49,10 @@ p{
 
 .controls{
   display:flex;
-  flex-wrap:wrap;
   gap:15px;
+  flex-wrap:wrap;
   justify-content:center;
-  margin-bottom:20px;
+  margin-bottom:25px;
 }
 
 input[type=file]{
@@ -162,11 +164,12 @@ Convierte automáticamente carpetas completas de HTML a PDF.
 
 <div class="info">
 
+✅ Conversión automática masiva<br>
 ✅ Descarga automática<br>
-✅ Conversión masiva<br>
-✅ Nombre automático usando tracking<br>
-✅ Sin abrir impresión<br>
-✅ PDFs descargados automáticamente
+✅ Nombre PDF = seguimiento + ID<br>
+✅ Sin abrir imprimir<br>
+✅ Sin aceptar guardar uno por uno<br>
+✅ Extracción automática desde HTML
 
 </div>
 
@@ -209,17 +212,17 @@ loadBtn.addEventListener("click", () => {
   });
 
   if(htmlFiles.length === 0){
-    alert("No hay archivos HTML.");
+    alert("No se encontraron archivos HTML.");
     return;
   }
 
-  renderList();
+  renderFileList();
 
   convertBtn.disabled = false;
 
 });
 
-function renderList(){
+function renderFileList(){
 
   fileList.innerHTML = "";
 
@@ -248,17 +251,17 @@ convertBtn.addEventListener("click", async () => {
 
   for(let i = 0; i < htmlFiles.length; i++){
 
-    await convertFile(htmlFiles[i], i);
+    await convertHTML(htmlFiles[i], i);
 
   }
 
-  alert("Conversión completada.");
+  alert("Conversión finalizada.");
 
   convertBtn.disabled = false;
 
 });
 
-async function convertFile(file, index){
+async function convertHTML(file, index){
 
   return new Promise((resolve) => {
 
@@ -270,16 +273,21 @@ async function convertFile(file, index){
 
         const html = event.target.result;
 
+        // Render HTML
         renderArea.innerHTML = html;
 
+        // Esperar imágenes
         await waitImages();
 
-        const tracking = extractTracking(html);
+        // Extraer tracking + ID
+        const data = extractData(html);
 
+        // Canvas
         const canvas = await html2canvas(renderArea, {
           scale:2,
           useCORS:true,
-          allowTaint:true
+          allowTaint:true,
+          backgroundColor:"#ffffff"
         });
 
         const imgData = canvas.toDataURL("image/png");
@@ -306,18 +314,22 @@ async function convertFile(file, index){
           pdfHeight
         );
 
-        // BLOB PDF
-        const pdfBlob = pdf.output("blob");
+        // NOMBRE FINAL
+        const finalName =
+          `${data.tracking}_ID_${data.id}.pdf`;
+
+        // BLOB
+        const blob = pdf.output("blob");
 
         // URL
-        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const url = URL.createObjectURL(blob);
 
         // DESCARGA AUTOMÁTICA
         const a = document.createElement("a");
 
-        a.href = pdfUrl;
+        a.href = url;
 
-        a.download = tracking + ".pdf";
+        a.download = finalName;
 
         document.body.appendChild(a);
 
@@ -325,7 +337,7 @@ async function convertFile(file, index){
 
         document.body.removeChild(a);
 
-        URL.revokeObjectURL(pdfUrl);
+        URL.revokeObjectURL(url);
 
         document.getElementById(
           `status-${index}`
@@ -350,39 +362,71 @@ async function convertFile(file, index){
 
     };
 
+    reader.onerror = function(){
+
+      document.getElementById(
+        `status-${index}`
+      ).innerHTML =
+        `<span class="error">Error lectura</span>`;
+
+      resolve();
+
+    };
+
     reader.readAsText(file);
 
   });
 
 }
 
-function extractTracking(html){
+function extractData(html){
+
+  let tracking = "SIN_TRACKING";
+  let id = "SIN_ID";
 
   try{
 
-    // Busca números largos
-    const matches = html.match(/\b\d{12,25}\b/g);
+    // TRACKING
+    const trackingMatches =
+      html.match(/\b\d{12,25}\b/g);
 
-    if(matches && matches.length > 0){
+    if(trackingMatches){
 
-      return matches[0];
+      tracking = trackingMatches[0];
 
     }
 
-    return "documento_" + Date.now();
+    // ID
+    const idRegex =
+      /ID[:\s]*([0-9]+)/i;
+
+    const idMatch =
+      html.match(idRegex);
+
+    if(idMatch){
+
+      id = idMatch[1];
+
+    }
 
   }
   catch(error){
 
-    return "documento_" + Date.now();
+    console.error(error);
 
   }
+
+  return {
+    tracking,
+    id
+  };
 
 }
 
 function waitImages(){
 
-  const images = renderArea.querySelectorAll("img");
+  const images =
+    renderArea.querySelectorAll("img");
 
   const promises = [];
 
