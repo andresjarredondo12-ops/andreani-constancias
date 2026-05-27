@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-<title>Sistema Integrado | HTML/PDF Auto Rename</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Sistema Integrado | PDF + HTML Auto Processor</title>
 
 <!-- PDF.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -68,14 +69,14 @@ body::before{
 .tag{
     font-family:'JetBrains Mono', monospace;
     color:var(--accent2);
-    letter-spacing:0.2em;
     font-size:11px;
+    letter-spacing:0.25em;
+    margin-bottom:14px;
     text-transform:uppercase;
-    margin-bottom:15px;
 }
 
 h1{
-    font-size:clamp(32px, 5vw, 54px);
+    font-size:clamp(32px,5vw,58px);
     line-height:1;
     margin-bottom:10px;
 }
@@ -94,31 +95,29 @@ h1 span{
     border:1px solid var(--border);
     border-radius:20px;
     padding:30px;
-    margin-bottom:20px;
 }
 
 .mode-selector{
     display:grid;
     grid-template-columns:1fr 1fr;
-    gap:15px;
-    margin-bottom:30px;
+    gap:14px;
+    margin-bottom:25px;
 }
 
 .mode-btn{
-    padding:18px;
-    border-radius:14px;
+    background:#101827;
     border:1px solid var(--border);
-    background:#111827;
-    color:var(--text);
+    border-radius:14px;
+    padding:18px;
     cursor:pointer;
     transition:0.2s;
     text-align:left;
+    color:white;
 }
 
 .mode-btn.active{
     border-color:var(--accent2);
     background:rgba(37,99,235,0.15);
-    box-shadow:0 0 0 1px rgba(56,189,248,0.3);
 }
 
 .mode-btn h3{
@@ -126,8 +125,8 @@ h1 span{
 }
 
 .mode-btn p{
-    font-size:13px;
     color:var(--muted);
+    font-size:13px;
     line-height:1.5;
 }
 
@@ -160,18 +159,21 @@ h1 span{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:14px;
-    margin-bottom:15px;
 }
 
 .btn{
     border:none;
     border-radius:12px;
-    padding:15px;
+    padding:16px;
+    cursor:pointer;
     font-size:15px;
     font-weight:700;
-    cursor:pointer;
     transition:0.2s;
     font-family:'Syne',sans-serif;
+}
+
+.btn:hover{
+    transform:translateY(-1px);
 }
 
 .btn-primary{
@@ -181,17 +183,12 @@ h1 span{
 
 .btn-primary:hover{
     background:#1d4ed8;
-    transform:translateY(-1px);
 }
 
 .btn-secondary{
     background:rgba(56,189,248,0.08);
     color:var(--accent2);
     border:1px solid rgba(56,189,248,0.2);
-}
-
-.btn-secondary:hover{
-    background:rgba(56,189,248,0.15);
 }
 
 .btn:disabled{
@@ -201,11 +198,11 @@ h1 span{
 
 #folderIndicator{
     display:none;
-    margin-top:15px;
+    margin-top:18px;
+    padding:14px;
+    border-radius:10px;
     background:rgba(34,197,94,0.08);
     border:1px solid rgba(34,197,94,0.2);
-    padding:12px;
-    border-radius:10px;
     color:var(--green);
     font-family:'JetBrains Mono', monospace;
     font-size:12px;
@@ -229,8 +226,8 @@ h1 span{
 }
 
 #counter{
-    font-family:'JetBrains Mono', monospace;
     color:var(--muted);
+    font-family:'JetBrains Mono', monospace;
     font-size:12px;
 }
 
@@ -243,10 +240,10 @@ h1 span{
 }
 
 #progressBar{
-    height:100%;
     width:0%;
+    height:100%;
     background:linear-gradient(90deg,var(--accent),var(--accent2));
-    transition:0.3s;
+    transition:0.25s;
 }
 
 .stats{
@@ -259,37 +256,35 @@ h1 span{
 .stat{
     background:rgba(255,255,255,0.03);
     border:1px solid var(--border);
-    border-radius:10px;
+    border-radius:12px;
     padding:14px;
     text-align:center;
 }
 
 .stat-value{
-    display:block;
     font-size:24px;
     font-family:'JetBrains Mono', monospace;
     font-weight:700;
-}
-
-.stat-label{
-    color:var(--muted);
-    font-size:11px;
-    text-transform:uppercase;
-    margin-top:5px;
 }
 
 .total{ color:var(--accent2); }
 .ok{ color:var(--green); }
 .err{ color:var(--red); }
 
+.stat-label{
+    margin-top:4px;
+    font-size:11px;
+    color:var(--muted);
+}
+
 #logConsole{
     margin-top:25px;
     background:#020408;
     border:1px solid var(--border);
     border-radius:12px;
-    padding:16px;
-    height:260px;
+    height:280px;
     overflow-y:auto;
+    padding:16px;
     font-family:'JetBrains Mono', monospace;
     font-size:11px;
 }
@@ -309,8 +304,30 @@ h1 span{
     padding:16px;
     border-radius:12px;
     background:rgba(34,197,94,0.08);
-    border:1px solid rgba(34,197,94,0.25);
+    border:1px solid rgba(34,197,94,0.2);
     color:var(--green);
+}
+
+.warning{
+    display:none;
+    margin-top:18px;
+    padding:16px;
+    border-radius:10px;
+    background:rgba(234,179,8,0.08);
+    border:1px solid rgba(234,179,8,0.2);
+    color:#facc15;
+    line-height:1.6;
+}
+
+.info{
+    margin-top:22px;
+    padding:18px;
+    border-radius:12px;
+    background:rgba(37,99,235,0.06);
+    border:1px solid rgba(56,189,248,0.15);
+    color:#cbd5e1;
+    line-height:1.8;
+    font-size:14px;
 }
 
 #renderArea{
@@ -321,33 +338,11 @@ h1 span{
     background:white;
 }
 
-.warning{
-    margin-top:15px;
-    padding:15px;
-    border-radius:10px;
-    background:rgba(234,179,8,0.08);
-    border:1px solid rgba(234,179,8,0.2);
-    color:#facc15;
-    line-height:1.6;
-    display:none;
-}
-
-.info-box{
-    margin-top:25px;
-    padding:18px;
-    border-radius:12px;
-    background:rgba(37,99,235,0.07);
-    border:1px solid rgba(56,189,248,0.15);
-    line-height:1.8;
-    color:#cbd5e1;
-    font-size:14px;
-}
-
-@media(max-width:700px){
+@media(max-width:750px){
 
     .mode-selector,
-    .controls,
     .steps,
+    .controls,
     .stats{
         grid-template-columns:1fr;
     }
@@ -362,16 +357,16 @@ h1 span{
 <div class="container">
 
 <div class="tag">
-SISTEMA INTEGRADO
+SISTEMA AUTOMATIZADO
 </div>
 
 <h1>
-HTML + PDF<br>
-<span>Auto Processing System</span>
+PDF + HTML<br>
+<span>Processing System</span>
 </h1>
 
 <p class="subtitle">
-Conversión masiva · Renombrado automático · Extracción inteligente · Guardado silencioso
+Renombrado inteligente · Conversión masiva · Guardado automático silencioso
 </p>
 
 <div class="card">
@@ -379,17 +374,23 @@ Conversión masiva · Renombrado automático · Extracción inteligente · Guard
 <div class="mode-selector">
 
 <button class="mode-btn active" id="modePDF">
-    <h3>📄 Procesar PDFs</h3>
-    <p>
-    Extrae seguimiento + ID desde PDFs existentes y los renombra automáticamente.
-    </p>
+
+<h3>📄 Renombrar PDFs</h3>
+
+<p>
+Extrae automáticamente Seguimiento Andreani + ID y renombra PDFs.
+</p>
+
 </button>
 
 <button class="mode-btn" id="modeHTML">
-    <h3>🌐 HTML → PDF</h3>
-    <p>
-    Convierte archivos HTML a PDF y genera nombres automáticos.
-    </p>
+
+<h3>🌐 HTML → PDF</h3>
+
+<p>
+Convierte HTML a PDF y genera nombres automáticos.
+</p>
+
 </button>
 
 </div>
@@ -397,17 +398,23 @@ Conversión masiva · Renombrado automático · Extracción inteligente · Guard
 <div class="steps">
 
 <div class="step">
+
 <strong>1. Elegir carpeta destino</strong>
+
 <p>
-Todos los archivos se guardarán automáticamente ahí.
+Se selecciona una sola vez. Luego el guardado es automático y silencioso.
 </p>
+
 </div>
 
 <div class="step">
+
 <strong>2. Seleccionar carpeta origen</strong>
+
 <p>
-El sistema procesa automáticamente HTML o PDFs según el modo activo.
+El sistema detecta automáticamente PDFs o HTMLs según el modo activo.
 </p>
+
 </div>
 
 </div>
@@ -419,7 +426,7 @@ El sistema procesa automáticamente HTML o PDFs según el modo activo.
 </button>
 
 <button class="btn btn-primary" id="btnProcesar" disabled>
-▶ Iniciar procesamiento
+▶ Procesar archivos
 </button>
 
 </div>
@@ -436,26 +443,44 @@ style="display:none"
 <div id="folderIndicator"></div>
 
 <div class="warning" id="compatWarning">
-⚠ Tu navegador no soporta File System Access API.<br>
-Los archivos se descargarán automáticamente en Descargas.
-Usá Chrome o Edge modernos para guardado silencioso directo.
+
+⚠ Tu navegador NO soporta File System Access API.<br><br>
+
+Para descargas masivas SIN ventanas de guardar:
+<br>
+✅ Chrome moderno
+<br>
+✅ Edge moderno
+<br><br>
+
+Firefox y Safari obligan a descargar archivo por archivo por limitaciones del navegador.
+
 </div>
 
-<div class="info-box">
-✅ Procesamiento masivo automático<br>
-✅ Extracción inteligente Tracking + ID<br>
+<div class="info">
+
+✅ Renombrado automático real<br>
+✅ Extracción inteligente igual al primer sistema<br>
+✅ Compatible con PDFs Andreani<br>
 ✅ Conversión HTML → PDF integrada<br>
-✅ Renombrado automático<br>
-✅ Compatible con miles de archivos<br>
-✅ Sin ventanas de impresión<br>
-✅ Sin guardar manualmente uno por uno
+✅ Guardado silencioso masivo<br>
+✅ Sin ventanas "Guardar como"<br>
+✅ Procesamiento de miles de archivos
+
 </div>
 
 <div id="progressArea">
 
 <div class="progress-header">
-<span id="statusLabel">Esperando...</span>
-<span id="counter">0/0</span>
+
+<span id="statusLabel">
+Esperando...
+</span>
+
+<span id="counter">
+0/0
+</span>
+
 </div>
 
 <div class="progress-track">
@@ -465,18 +490,33 @@ Usá Chrome o Edge modernos para guardado silencioso directo.
 <div class="stats">
 
 <div class="stat">
+
 <span class="stat-value total" id="statTotal">0</span>
-<span class="stat-label">TOTAL</span>
+
+<div class="stat-label">
+TOTAL
+</div>
+
 </div>
 
 <div class="stat">
+
 <span class="stat-value ok" id="statOk">0</span>
-<span class="stat-label">OK</span>
+
+<div class="stat-label">
+OK
+</div>
+
 </div>
 
 <div class="stat">
+
 <span class="stat-value err" id="statErr">0</span>
-<span class="stat-label">ERRORES</span>
+
+<div class="stat-label">
+ERRORES
+</div>
+
 </div>
 
 </div>
@@ -486,9 +526,11 @@ Usá Chrome o Edge modernos para guardado silencioso directo.
 <div class="done" id="doneBanner"></div>
 
 <div id="logConsole">
+
 <div class="log-line" style="color:#475569">
 > Sistema listo.
 </div>
+
 </div>
 
 </div>
@@ -499,29 +541,34 @@ Usá Chrome o Edge modernos para guardado silencioso directo.
 
 <script>
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // LIBRERÍAS
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 const pdfjsLib = window['pdfjs-dist/build/pdf'];
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // ELEMENTOS
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
-const fileInput       = document.getElementById('fileInput');
+const modePDFBtn      = document.getElementById('modePDF');
+const modeHTMLBtn     = document.getElementById('modeHTML');
+
 const btnDestino      = document.getElementById('btnDestino');
 const btnProcesar     = document.getElementById('btnProcesar');
+
+const fileInput       = document.getElementById('fileInput');
 
 const folderIndicator = document.getElementById('folderIndicator');
 
 const progressArea    = document.getElementById('progressArea');
 const progressBar     = document.getElementById('progressBar');
-const counter         = document.getElementById('counter');
+
 const statusLabel     = document.getElementById('statusLabel');
+const counter         = document.getElementById('counter');
 
 const statTotal       = document.getElementById('statTotal');
 const statOk          = document.getElementById('statOk');
@@ -532,24 +579,22 @@ const doneBanner      = document.getElementById('doneBanner');
 
 const renderArea      = document.getElementById('renderArea');
 
-const modePDFBtn      = document.getElementById('modePDF');
-const modeHTMLBtn     = document.getElementById('modeHTML');
-
 const compatWarning   = document.getElementById('compatWarning');
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // VARIABLES
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
-let currentMode = "pdf";
+let currentMode = 'pdf';
 
-const fsaSupported = ('showDirectoryPicker' in window);
+const fsaSupported =
+    ('showDirectoryPicker' in window);
 
 let destDirHandle = null;
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // COMPATIBILIDAD
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 if(!fsaSupported){
 
@@ -559,39 +604,53 @@ if(!fsaSupported){
 
 }
 
-///////////////////////////////////////////////////////////
-// MODO
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+// MODOS
+////////////////////////////////////////////////////////////
 
 modePDFBtn.onclick = () => {
 
-    currentMode = "pdf";
+    currentMode = 'pdf';
 
-    modePDFBtn.classList.add("active");
-    modeHTMLBtn.classList.remove("active");
+    modePDFBtn.classList.add('active');
+    modeHTMLBtn.classList.remove('active');
 
-    log("Modo activo: PDFs", "#38bdf8");
+    log(
+        'Modo activo: PDFs',
+        '#38bdf8'
+    );
 
 };
 
 modeHTMLBtn.onclick = () => {
 
-    currentMode = "html";
+    currentMode = 'html';
 
-    modeHTMLBtn.classList.add("active");
-    modePDFBtn.classList.remove("active");
+    modeHTMLBtn.classList.add('active');
+    modePDFBtn.classList.remove('active');
 
-    log("Modo activo: HTML → PDF", "#38bdf8");
+    log(
+        'Modo activo: HTML → PDF',
+        '#38bdf8'
+    );
 
 };
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // CARPETA DESTINO
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 btnDestino.onclick = async () => {
 
-    if(!fsaSupported) return;
+    if(!fsaSupported){
+
+        alert(
+            'Tu navegador no soporta guardado silencioso.'
+        );
+
+        return;
+
+    }
 
     try{
 
@@ -603,12 +662,12 @@ btnDestino.onclick = async () => {
         folderIndicator.style.display = 'block';
 
         folderIndicator.innerHTML =
-            `✅ Carpeta seleccionada: ${destDirHandle.name}`;
+            `✅ Carpeta destino: ${destDirHandle.name}`;
 
         btnProcesar.disabled = false;
 
         log(
-            `Carpeta destino: ${destDirHandle.name}`,
+            `Carpeta seleccionada: ${destDirHandle.name}`,
             '#22c55e'
         );
 
@@ -628,9 +687,9 @@ btnDestino.onclick = async () => {
 
 };
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // BOTÓN PROCESAR
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 btnProcesar.onclick = () => {
 
@@ -640,37 +699,33 @@ btnProcesar.onclick = () => {
 
 };
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // INPUT FILES
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 fileInput.onchange = async (e) => {
 
-    const files = Array.from(e.target.files);
+    const allFiles =
+        Array.from(e.target.files);
 
-    if(files.length === 0){
-
-        log("No se seleccionaron archivos.", '#eab308');
-
-        return;
-
-    }
-
-    let filtered = [];
+    let files = [];
 
     if(currentMode === 'pdf'){
 
-        filtered =
-            files.filter(f =>
-                f.name.toLowerCase().endsWith('.pdf')
+        files =
+            allFiles.filter(file =>
+                file.name
+                .toLowerCase()
+                .endsWith('.pdf')
             );
 
     }else{
 
-        filtered =
-            files.filter(f => {
+        files =
+            allFiles.filter(file => {
 
-                const name = f.name.toLowerCase();
+                const name =
+                    file.name.toLowerCase();
 
                 return (
                     name.endsWith('.html') ||
@@ -681,29 +736,29 @@ fileInput.onchange = async (e) => {
 
     }
 
-    if(filtered.length === 0){
+    if(files.length === 0){
 
         log(
-            `No se encontraron archivos válidos para modo ${currentMode.toUpperCase()}`,
-            '#ef4444'
+            'No se encontraron archivos válidos.',
+            '#eab308'
         );
 
         return;
 
     }
 
-    resetUI(filtered.length);
+    resetUI(files.length);
 
     let ok = 0;
     let err = 0;
 
-    for(let i=0; i<filtered.length; i++){
+    for(let i=0; i<files.length; i++){
 
-        const file = filtered[i];
+        const file = files[i];
 
         updateUI(
-            i+1,
-            filtered.length,
+            i + 1,
+            files.length,
             file.name
         );
 
@@ -739,27 +794,52 @@ fileInput.onchange = async (e) => {
 
     }
 
-    finishProcess(ok, err, filtered.length);
+    finishProcess(
+        ok,
+        err,
+        files.length
+    );
 
 };
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // PROCESAR PDF
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 async function processPDF(file){
 
-    const text = await extractTextFromPDF(file);
+    const text =
+        await extractTextFromPDF(file);
 
-    const data = extractData(text);
+    // EXACTAMENTE COMO TU PRIMER SISTEMA
+
+    const seguimientoMatch =
+        text.match(/\b\d{15}\b/);
+
+    const idMatch =
+        text.match(
+            /ID\s*[:#-]?\s*(\d+)/i
+        );
+
+    const seguimiento =
+        seguimientoMatch
+        ? seguimientoMatch[0]
+        : 'SIN_SEGUIMIENTO';
+
+    const id =
+        idMatch
+        ? idMatch[1]
+        : '0000';
 
     const finalName =
-        `${data.tracking}(id_${data.id}).pdf`;
+        `${seguimiento}(id_${id}).pdf`;
 
-    await saveFile(
-        await file.arrayBuffer(),
-        finalName,
-        'application/pdf'
+    const arrayBuffer =
+        await file.arrayBuffer();
+
+    await saveArrayBuffer(
+        arrayBuffer,
+        finalName
     );
 
     log(
@@ -769,9 +849,9 @@ async function processPDF(file){
 
 }
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // PROCESAR HTML
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 async function processHTML(file){
 
@@ -782,28 +862,51 @@ async function processHTML(file){
 
     await waitImages();
 
-    const data =
-        extractData(html);
+    // EXTRACCIÓN EXACTA
+
+    const trackingMatches =
+        html.match(/\b\d{12,25}\b/g);
+
+    const tracking =
+        trackingMatches
+        ? trackingMatches[0]
+        : 'SIN_SEGUIMIENTO';
+
+    const idRegex =
+        /ID[:\s#-]*([0-9]+)/i;
+
+    const idMatch =
+        html.match(idRegex);
+
+    const id =
+        idMatch
+        ? idMatch[1]
+        : '0000';
+
+    // GENERAR PDF
 
     const canvas =
-        await html2canvas(renderArea,{
-            scale:2,
-            useCORS:true,
-            allowTaint:true,
-            backgroundColor:"#ffffff"
-        });
+        await html2canvas(
+            renderArea,
+            {
+                scale:2,
+                useCORS:true,
+                allowTaint:true,
+                backgroundColor:'#ffffff'
+            }
+        );
 
     const imgData =
-        canvas.toDataURL("image/png");
+        canvas.toDataURL('image/png');
 
     const { jsPDF } =
         window.jspdf;
 
     const pdf =
         new jsPDF({
-            orientation:"p",
-            unit:"mm",
-            format:"a4"
+            orientation:'p',
+            unit:'mm',
+            format:'a4'
         });
 
     const pdfWidth = 210;
@@ -814,7 +917,7 @@ async function processHTML(file){
 
     pdf.addImage(
         imgData,
-        "PNG",
+        'PNG',
         0,
         0,
         pdfWidth,
@@ -822,7 +925,7 @@ async function processHTML(file){
     );
 
     const finalName =
-        `${data.tracking}(id_${data.id}).pdf`;
+        `${tracking}(id_${id}).pdf`;
 
     const blob =
         pdf.output('blob');
@@ -830,10 +933,9 @@ async function processHTML(file){
     const arrayBuffer =
         await blob.arrayBuffer();
 
-    await saveFile(
+    await saveArrayBuffer(
         arrayBuffer,
-        finalName,
-        'application/pdf'
+        finalName
     );
 
     log(
@@ -843,22 +945,24 @@ async function processHTML(file){
 
 }
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // EXTRAER TEXTO PDF
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 async function extractTextFromPDF(file){
 
-    const buffer =
+    const arrayBuffer =
         await file.arrayBuffer();
 
     const pdf =
         await pdfjsLib
         .getDocument({
-            data:buffer
+            data:arrayBuffer
         }).promise;
 
     let text = '';
+
+    // EXACTAMENTE COMO TU SISTEMA ORIGINAL
 
     const pages =
         Math.min(pdf.numPages, 2);
@@ -882,64 +986,17 @@ async function extractTextFromPDF(file){
 
 }
 
-///////////////////////////////////////////////////////////
-// EXTRAER DATOS
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
+// SAVE SILENCIOSO
+////////////////////////////////////////////////////////////
 
-function extractData(content){
-
-    let tracking = 'SIN_SEGUIMIENTO';
-
-    let id = '0000';
-
-    try{
-
-        // TRACKING
-        const trackingMatches =
-            content.match(/\b\d{12,25}\b/g);
-
-        if(trackingMatches){
-
-            tracking = trackingMatches[0];
-
-        }
-
-        // ID
-        const idRegex =
-            /ID\s*[:#-]?\s*(\d+)/i;
-
-        const idMatch =
-            content.match(idRegex);
-
-        if(idMatch){
-
-            id = idMatch[1];
-
-        }
-
-    }
-    catch(error){
-
-        console.error(error);
-
-    }
-
-    return {
-        tracking,
-        id
-    };
-
-}
-
-///////////////////////////////////////////////////////////
-// GUARDAR
-///////////////////////////////////////////////////////////
-
-async function saveFile(
-    data,
-    filename,
-    mimeType
+async function saveArrayBuffer(
+    arrayBuffer,
+    filename
 ){
+
+    // CHROME / EDGE
+    // GUARDADO REAL SILENCIOSO
 
     if(fsaSupported && destDirHandle){
 
@@ -954,16 +1011,19 @@ async function saveFile(
             await fileHandle
             .createWritable();
 
-        await writable.write(data);
+        await writable.write(arrayBuffer);
 
         await writable.close();
 
     }else{
 
+        // FALLBACK
+        // Firefox / Safari
+
         const blob =
             new Blob(
-                [data],
-                { type:mimeType }
+                [arrayBuffer],
+                { type:'application/pdf' }
             );
 
         const url =
@@ -980,10 +1040,6 @@ async function saveFile(
 
         a.click();
 
-        await new Promise(r =>
-            setTimeout(r,300)
-        );
-
         document.body.removeChild(a);
 
         URL.revokeObjectURL(url);
@@ -992,9 +1048,9 @@ async function saveFile(
 
 }
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // ESPERAR IMÁGENES
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 function waitImages(){
 
@@ -1022,9 +1078,9 @@ function waitImages(){
 
 }
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // UI
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 function resetUI(total){
 
@@ -1034,7 +1090,8 @@ function resetUI(total){
 
     progressBar.style.width = '0%';
 
-    counter.textContent = `0/${total}`;
+    counter.textContent =
+        `0/${total}`;
 
     statusLabel.textContent =
         'Iniciando procesamiento...';
@@ -1047,9 +1104,11 @@ function resetUI(total){
     statErr.textContent = '0';
 
     logConsole.innerHTML =
-        `<div class="log-line" style="color:#475569">
+        `
+        <div class="log-line" style="color:#475569">
         > Procesamiento iniciado...
-        </div>`;
+        </div>
+        `;
 
 }
 
@@ -1067,8 +1126,8 @@ function updateUI(
 
     statusLabel.textContent =
         `Procesando: ${
-            filename.length > 40
-            ? filename.substring(0,40)+'...'
+            filename.length > 42
+            ? filename.substring(0,42)+'...'
             : filename
         }`;
 
@@ -1094,8 +1153,9 @@ function finishProcess(
         <strong>
         ✅ ${ok}/${total} archivos procesados
         </strong>
-        <br>
-        ${err > 0
+        <br><br>
+        ${
+            err > 0
             ? `⚠ ${err} errores detectados`
             : `Sin errores`
         }
@@ -1108,12 +1168,12 @@ function finishProcess(
 
 }
 
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 // LOG
-///////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////
 
 function log(
-    message,
+    msg,
     color='#64748b'
 ){
 
@@ -1129,7 +1189,7 @@ function log(
         </span>
 
         <span style="color:${color}">
-        ${message}
+        ${msg}
         </span>
         `;
 
