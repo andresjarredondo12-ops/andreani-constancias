@@ -4,12 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Conversor Automático HTML → PDF</title>
+<title>Conversor Masivo HTML → PDF</title>
 
-<!-- html2canvas -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- jsPDF -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -49,10 +47,10 @@ p{
 
 .controls{
   display:flex;
-  gap:15px;
   flex-wrap:wrap;
+  gap:15px;
   justify-content:center;
-  margin-bottom:25px;
+  margin-bottom:20px;
 }
 
 input[type=file]{
@@ -77,11 +75,10 @@ button:hover{
 
 button:disabled{
   background:#888;
-  cursor:not-allowed;
 }
 
 #fileList{
-  margin-top:20px;
+  margin-top:25px;
   border:1px solid #ccc;
   border-radius:10px;
   overflow:hidden;
@@ -120,14 +117,13 @@ button:disabled{
   top:0;
   width:1200px;
   background:white;
-  padding:0;
 }
 
 .info{
   margin-top:20px;
+  padding:15px;
   background:#eef6ff;
   border-left:5px solid #0077ff;
-  padding:15px;
   border-radius:8px;
   line-height:1.7;
 }
@@ -139,11 +135,10 @@ button:disabled{
 
 <div class="container">
 
-<h1>Conversor Automático HTML → PDF</h1>
+<h1>Conversor Masivo HTML → PDF</h1>
 
 <p>
-Convierte automáticamente múltiples archivos HTML a PDF.<br>
-Los PDFs se guardarán automáticamente usando el ID y seguimiento encontrados dentro del HTML.
+Convierte automáticamente carpetas completas de HTML a PDF.
 </p>
 
 <div class="controls">
@@ -160,18 +155,18 @@ Los PDFs se guardarán automáticamente usando el ID y seguimiento encontrados d
 </button>
 
 <button id="convertBtn" disabled>
-  Convertir Automáticamente
+  Convertir Todo
 </button>
 
 </div>
 
 <div class="info">
 
-✅ Conversión masiva automática<br>
-✅ Nombre PDF automático<br>
-✅ Extracción de ID y Seguimiento<br>
-✅ Sin abrir impresión del navegador<br>
-✅ Compatible con Chrome / Edge
+✅ Descarga automática<br>
+✅ Conversión masiva<br>
+✅ Nombre automático usando tracking<br>
+✅ Sin abrir impresión<br>
+✅ PDFs descargados automáticamente
 
 </div>
 
@@ -214,17 +209,17 @@ loadBtn.addEventListener("click", () => {
   });
 
   if(htmlFiles.length === 0){
-    alert("No se encontraron archivos HTML.");
+    alert("No hay archivos HTML.");
     return;
   }
 
-  renderFileList();
+  renderList();
 
   convertBtn.disabled = false;
 
 });
 
-function renderFileList(){
+function renderList(){
 
   fileList.innerHTML = "";
 
@@ -235,7 +230,7 @@ function renderFileList(){
     div.className = "file-item";
 
     div.innerHTML = `
-      <span>${file.webkitRelativePath || file.name}</span>
+      <span>${file.webkitRelativePath}</span>
       <span class="pending" id="status-${index}">
         Pendiente
       </span>
@@ -253,17 +248,17 @@ convertBtn.addEventListener("click", async () => {
 
   for(let i = 0; i < htmlFiles.length; i++){
 
-    await processHTML(htmlFiles[i], i);
+    await convertFile(htmlFiles[i], i);
 
   }
 
-  alert("Conversión finalizada.");
+  alert("Conversión completada.");
 
   convertBtn.disabled = false;
 
 });
 
-async function processHTML(file, index){
+async function convertFile(file, index){
 
   return new Promise((resolve) => {
 
@@ -275,21 +270,16 @@ async function processHTML(file, index){
 
         const html = event.target.result;
 
-        // Renderizar HTML
         renderArea.innerHTML = html;
 
-        // Esperar imágenes
         await waitImages();
 
-        // Extraer ID y Seguimiento
-        const extractedName = extractTracking(html);
+        const tracking = extractTracking(html);
 
-        // Captura HTML
         const canvas = await html2canvas(renderArea, {
           scale:2,
           useCORS:true,
-          allowTaint:true,
-          logging:false
+          allowTaint:true
         });
 
         const imgData = canvas.toDataURL("image/png");
@@ -316,17 +306,31 @@ async function processHTML(file, index){
           pdfHeight
         );
 
-        // Nombre automático
-        const finalName =
-          extractedName + ".pdf";
+        // BLOB PDF
+        const pdfBlob = pdf.output("blob");
+
+        // URL
+        const pdfUrl = URL.createObjectURL(pdfBlob);
 
         // DESCARGA AUTOMÁTICA
-        pdf.save(finalName);
+        const a = document.createElement("a");
+
+        a.href = pdfUrl;
+
+        a.download = tracking + ".pdf";
+
+        document.body.appendChild(a);
+
+        a.click();
+
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(pdfUrl);
 
         document.getElementById(
           `status-${index}`
         ).innerHTML =
-          `<span class="ok">Convertido</span>`;
+          `<span class="ok">Descargado</span>`;
 
         resolve();
 
@@ -346,17 +350,6 @@ async function processHTML(file, index){
 
     };
 
-    reader.onerror = function(){
-
-      document.getElementById(
-        `status-${index}`
-      ).innerHTML =
-        `<span class="error">Error lectura</span>`;
-
-      resolve();
-
-    };
-
     reader.readAsText(file);
 
   });
@@ -367,44 +360,12 @@ function extractTracking(html){
 
   try{
 
-    // Buscar número largo tipo seguimiento
-    const trackingMatch = html.match(/\b\d{12,25}\b/g);
+    // Busca números largos
+    const matches = html.match(/\b\d{12,25}\b/g);
 
-    let tracking = "";
+    if(matches && matches.length > 0){
 
-    if(trackingMatch && trackingMatch.length > 0){
-
-      tracking = trackingMatch[0];
-
-    }
-
-    // Buscar ID
-    const idMatch = html.match(/ID[:\s]*([0-9]+)/i);
-
-    let id = "";
-
-    if(idMatch){
-
-      id = idMatch[1];
-
-    }
-
-    // Generar nombre
-    if(tracking && id){
-
-      return `${tracking}_ID_${id}`;
-
-    }
-
-    if(tracking){
-
-      return tracking;
-
-    }
-
-    if(id){
-
-      return `ID_${id}`;
+      return matches[0];
 
     }
 
