@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Conversor Masivo HTML → PDF</title>
+<title>Conversor Automático HTML → PDF</title>
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<!-- html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 <style>
 
@@ -31,21 +37,22 @@ body{
 
 h1{
   text-align:center;
-  margin-bottom:20px;
   color:#c1121f;
+  margin-bottom:20px;
 }
 
 p{
   text-align:center;
   margin-bottom:25px;
+  line-height:1.6;
 }
 
 .controls{
   display:flex;
-  gap:15px;
   flex-wrap:wrap;
+  gap:15px;
   justify-content:center;
-  margin-bottom:20px;
+  margin-bottom:25px;
 }
 
 input[type=file]{
@@ -60,8 +67,8 @@ button{
   border-radius:8px;
   background:#0077ff;
   color:white;
-  cursor:pointer;
   font-size:16px;
+  cursor:pointer;
 }
 
 button:hover{
@@ -74,7 +81,7 @@ button:disabled{
 }
 
 #fileList{
-  margin-top:25px;
+  margin-top:20px;
   border:1px solid #ccc;
   border-radius:10px;
   overflow:hidden;
@@ -92,6 +99,11 @@ button:disabled{
   background:#f0f0f0;
 }
 
+.pending{
+  color:orange;
+  font-weight:bold;
+}
+
 .ok{
   color:green;
   font-weight:bold;
@@ -102,25 +114,21 @@ button:disabled{
   font-weight:bold;
 }
 
-.pending{
-  color:orange;
-  font-weight:bold;
-}
-
-iframe{
-  width:0;
-  height:0;
-  border:none;
+#renderArea{
   position:absolute;
-  visibility:hidden;
+  left:-99999px;
+  top:0;
+  width:1200px;
+  background:white;
 }
 
 .info{
   margin-top:20px;
-  padding:15px;
   background:#eef6ff;
   border-left:5px solid #0077ff;
+  padding:15px;
   border-radius:8px;
+  line-height:1.6;
 }
 
 </style>
@@ -130,10 +138,11 @@ iframe{
 
 <div class="container">
 
-<h1>Conversor Masivo HTML → PDF</h1>
+<h1>Conversor Automático HTML → PDF</h1>
 
 <p>
-Subí múltiples archivos HTML o una carpeta completa.
+Subí una carpeta completa con archivos HTML.<br>
+La conversión a PDF será automática.
 </p>
 
 <div class="controls">
@@ -150,21 +159,23 @@ Subí múltiples archivos HTML o una carpeta completa.
 </button>
 
 <button id="convertBtn" disabled>
-  Convertir a PDF
+  Convertir Automáticamente
 </button>
 
 </div>
 
 <div class="info">
-El navegador abrirá automáticamente el diálogo de impresión
-para cada HTML.
+✅ Conversión masiva automática<br>
+✅ Sin aceptar manualmente uno por uno<br>
+✅ Generación PDF real<br>
+✅ Compatible con Chrome y Edge
 </div>
 
 <div id="fileList"></div>
 
 </div>
 
-<iframe id="viewer"></iframe>
+<div id="renderArea"></div>
 
 <script>
 
@@ -172,7 +183,7 @@ const folderInput = document.getElementById("folderInput");
 const loadBtn = document.getElementById("loadBtn");
 const convertBtn = document.getElementById("convertBtn");
 const fileList = document.getElementById("fileList");
-const viewer = document.getElementById("viewer");
+const renderArea = document.getElementById("renderArea");
 
 let htmlFiles = [];
 
@@ -187,7 +198,6 @@ loadBtn.addEventListener("click", () => {
     return;
   }
 
-  // SOLO HTML REALES
   htmlFiles = files.filter(file => {
 
     const name = file.name.toLowerCase();
@@ -204,13 +214,13 @@ loadBtn.addEventListener("click", () => {
     return;
   }
 
-  renderList();
+  renderFiles();
 
   convertBtn.disabled = false;
 
 });
 
-function renderList(){
+function renderFiles(){
 
   fileList.innerHTML = "";
 
@@ -235,97 +245,128 @@ function renderList(){
 
 convertBtn.addEventListener("click", async () => {
 
+  convertBtn.disabled = true;
+
   for(let i = 0; i < htmlFiles.length; i++){
 
-    await processHTML(htmlFiles[i], i);
+    await convertHTMLToPDF(htmlFiles[i], i);
 
   }
 
-  alert("Conversión finalizada.");
+  alert("Conversión masiva finalizada.");
+
+  convertBtn.disabled = false;
 
 });
 
-function processHTML(file, index){
+async function convertHTMLToPDF(file, index){
 
   return new Promise((resolve) => {
 
-    try{
+    const reader = new FileReader();
 
-      const reader = new FileReader();
+    reader.onload = async function(event){
 
-      reader.onload = function(event){
+      try{
 
-        try{
+        const html = event.target.result;
 
-          const html = event.target.result;
+        renderArea.innerHTML = html;
 
-          const iframeDoc =
-            viewer.contentDocument ||
-            viewer.contentWindow.document;
+        await waitImages();
 
-          iframeDoc.open();
-          iframeDoc.write(html);
-          iframeDoc.close();
+        const canvas = await html2canvas(renderArea, {
+          scale:2,
+          useCORS:true,
+          allowTaint:true
+        });
 
-          document.getElementById(
-            `status-${index}`
-          ).innerHTML =
-            `<span class="ok">Procesado</span>`;
+        const imgData = canvas.toDataURL("image/png");
 
-          setTimeout(() => {
+        const { jsPDF } = window.jspdf;
 
-            viewer.contentWindow.focus();
+        const pdf = new jsPDF("p", "mm", "a4");
 
-            viewer.contentWindow.print();
+        const pdfWidth = 210;
+        const pdfHeight =
+          (canvas.height * pdfWidth) / canvas.width;
 
-            resolve();
+        pdf.addImage(
+          imgData,
+          "PNG",
+          0,
+          0,
+          pdfWidth,
+          pdfHeight
+        );
 
-          }, 800);
+        const fileName =
+          file.name.replace(/\.html?$/i, "") + ".pdf";
 
-        }
-        catch(err){
-
-          document.getElementById(
-            `status-${index}`
-          ).innerHTML =
-            `<span class="error">Error HTML</span>`;
-
-          console.error(err);
-
-          resolve();
-
-        }
-
-      };
-
-      reader.onerror = function(){
+        pdf.save(fileName);
 
         document.getElementById(
           `status-${index}`
         ).innerHTML =
-          `<span class="error">Error lectura</span>`;
+          `<span class="ok">Convertido</span>`;
 
         resolve();
 
-      };
+      }
+      catch(error){
 
-      reader.readAsText(file);
+        console.error(error);
 
-    }
-    catch(err){
+        document.getElementById(
+          `status-${index}`
+        ).innerHTML =
+          `<span class="error">Error</span>`;
+
+        resolve();
+
+      }
+
+    };
+
+    reader.onerror = function(){
 
       document.getElementById(
         `status-${index}`
       ).innerHTML =
-        `<span class="error">Error general</span>`;
-
-      console.error(err);
+        `<span class="error">Error lectura</span>`;
 
       resolve();
 
-    }
+    };
+
+    reader.readAsText(file);
 
   });
+
+}
+
+function waitImages(){
+
+  const images = renderArea.querySelectorAll("img");
+
+  const promises = [];
+
+  images.forEach(img => {
+
+    if(img.complete){
+      return;
+    }
+
+    promises.push(new Promise(resolve => {
+
+      img.onload = resolve;
+      img.onerror = resolve;
+
+    }));
+
+  });
+
+  return Promise.all(promises);
 
 }
 
